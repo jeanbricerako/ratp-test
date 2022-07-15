@@ -1,0 +1,30 @@
+import { Injectable } from '@nestjs/common';
+import axios from 'axios';
+import { WC } from '../entities/wc';
+
+const url = `https://data.ratp.fr/api/records/1.0/search/?dataset=sanitaires-reseau-ratp&q=&facet=ligne&facet=station&facet=tarif_gratuit_payant&facet=acces_bouton_poussoir&facet=en_zone_controlee&facet=hors_zone_controlee_station&facet=hors_zone_controlee_voie_publique`;
+
+@Injectable()
+export default class WCRepository {
+  async getListByMetroName(name: string): Promise<WC[]> {
+    try {
+      const res = await axios.get(url);
+      const records = res.data.records;
+      const wcListFromMetro = records.filter((r) => r.fields.ligne === name);
+      return wcListFromMetro.map(this.transformToWCEntity);
+    } catch (e) {
+      throw new Error('Cannot GET RATP API');
+    }
+  }
+
+  private transformToWCEntity(data: any) {
+    return {
+      id: data.recordid,
+      metro: data.fields.ligne,
+      station: data.fields.station,
+      isPubliclyAvailable: data.fields.accessible_au_public,
+      isFree: data.fields.tarif_gratuit_payant,
+      coord_geo: data.fields.coord_geo,
+    };
+  }
+}
