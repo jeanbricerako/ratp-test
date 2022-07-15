@@ -6,7 +6,11 @@ type Repository = {
 
 export function buildGetList(repository: Repository) {
   return async function getList(metroName: string): Promise<WC[]> {
-    const wcs = await repository.getListByMetroName(metroName);
-    return wcs;
+    try {
+      const wcs = await repository.getListByMetroName(metroName);
+      return wcs;
+    } catch (e) {
+      throw e;
+    }
   };
 }

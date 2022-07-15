@@ -6,15 +6,14 @@ const url = `https://data.ratp.fr/api/records/1.0/search/?dataset=sanitaires-res
 
 @Injectable()
 export default class WCRepository {
-  async getListByMetroName(name: string): Promise<WC[]> {
-    try {
-      const res = await axios.get(url);
-      const records = res.data.records;
-      const wcListFromMetro = records.filter((r) => r.fields.ligne === name);
-      return wcListFromMetro.map(this.transformToWCEntity);
-    } catch (e) {
-      throw new Error('Cannot GET RATP API');
+  async getListByMetroName(name: string): Promise<WC[] | Error> {
+    const res = await axios.get(url);
+    const records = res.data.records;
+    const wcListFromMetro = records.filter((r) => r.fields.ligne === name);
+    if (!wcListFromMetro.length) {
+      throw new Error(`Cannot find a result with ${name}`);
     }
+    return wcListFromMetro.map(this.transformToWCEntity);
   }
 
   private transformToWCEntity(data: any) {

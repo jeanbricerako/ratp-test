@@ -1,4 +1,10 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+} from '@nestjs/common';
 import { WC } from '../entities/wc';
 import { WCService } from '../services/wc/wc.service';
 
@@ -8,6 +14,11 @@ export class WCController {
 
   @Get('wc/list/ligne/:name')
   async getListWC(@Param('name') name: string): Promise<WC[]> {
-    return this.service.getListWC(name);
+    try {
+      const list = await this.service.getListWC(name);
+      return list;
+    } catch (e) {
+      throw new HttpException('Ligne not found', HttpStatus.NOT_FOUND);
+    }
   }
 }
